@@ -1,3 +1,4 @@
 yfinance
 plotly
 yahooquery
+fbprophet==0.7.1
