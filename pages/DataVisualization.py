@@ -1,5 +1,4 @@
 import pandas as pd
-from fbprophet import Prophet
 import yfinance as yf
 import streamlit as st
 import datetime
@@ -15,6 +14,7 @@ hide_menu_style = """
         </style>
         """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
+# st.sidebar.header("FB PROPHET")
 
 # st.markdown('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">', unsafe_allow_html=True)
 # with open('style.css') as f:
@@ -29,18 +29,8 @@ st.markdown(hide_menu_style, unsafe_allow_html=True)
 # integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
 # crossorigin="anonymous"></script>
 # """, unsafe_allow_html=True)
-today = date.today()
 
-d1 = today.strftime("%Y-%m-%d")
-end_date = d1
-d2 = date.today() - timedelta(days=730)
-d2 = d2.strftime("%Y-%m-%d")
-start_date = d2
-# with open('style.css') as f:
-#     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-
-st.title("CRYPTOCURRENCY PREDICTION")
+st.title("CRYPTOCURRENCY ANALYSIS")
 
 # df = pd.read_csv('BTC-USD.csv')
 # df = pd.read_csv(data)
@@ -56,12 +46,26 @@ with st.form(key='my_form'):
   # user_input=st.text_input("Enter coin name: ", 'BTC-USD')
   coin_name=user_input.upper()
   # period=int(input('Enter number of days: '))
-  period=st.slider(label='Enter number of days:', min_value=0, max_value=365, key=3)
+  period=st.slider(label='Enter number of Years:', min_value=1, max_value=10, key=3)
 
   # period=st.number_input("Enter number of days", 10)
   submit_button = st.form_submit_button(label='Submit')
+
+today = date.today()
+period=int(period*365)
+d1 = today.strftime("%Y-%m-%d")
+end_date = d1
+d2 = date.today() - timedelta(days=period)
+d2 = d2.strftime("%Y-%m-%d")
+start_date = d2
+# with open('style.css') as f:
+#     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+
+
+
 # if submit:
-period=int(period)
+
 data = yf.download(coin_name, 
                         start=start_date, 
                         end=end_date, 
@@ -73,10 +77,12 @@ data.reset_index(drop=True, inplace=True)
 df = data[["Date", "Close"]]
 df.columns = ["ds", "y"]
   # print(df)
-prophet = Prophet()
-prophet.fit(df)
-future = prophet.make_future_dataframe(periods=period)
-  # print(future)
+
+# from fbprophet import Prophet
+# prophet = Prophet()
+# prophet.fit(df)
+# future = prophet.make_future_dataframe(periods=period)
+#   # print(future)
 
 figure1 = go.Figure(data=[go.Candlestick(x=data["Date"],
                                           open=data["Open"], 
@@ -86,17 +92,17 @@ figure1 = go.Figure(data=[go.Candlestick(x=data["Date"],
 figure1.update_layout(title = coin_name+" Price Analysis", 
                       xaxis_rangeslider_visible=True)
   # figure.show()
-forecast = prophet.predict(future)
+# forecast = prophet.predict(future)
   # forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(30)
-forecast1 = forecast[["ds","trend", "yhat", "yhat_lower", "yhat_upper"]].tail(period)
+# forecast1 = forecast[["ds","trend", "yhat", "yhat_lower", "yhat_upper"]].tail(period)
 
-figure = go.Figure()
-figure.add_trace(go.Scatter(x=forecast["ds"],y=forecast["yhat"],name='yhat'))
-figure.add_trace(go.Scatter(x=forecast["ds"],y=forecast["yhat_lower"],name='yhat_lower'))
-figure.add_trace(go.Scatter(x=forecast["ds"],y=forecast["yhat_upper"],name='yhat_upper'))
-  # figure.add_trace(go.Scatter(x=forecast["ds"],y=forecast["trend"]))
-figure.update_layout(title = coin_name+" Price Analysis and Prediction", 
-                      xaxis_rangeslider_visible=True)
+# figure = go.Figure()
+# figure.add_trace(go.Scatter(x=forecast["ds"],y=forecast["yhat"],name='yhat'))
+# figure.add_trace(go.Scatter(x=forecast["ds"],y=forecast["yhat_lower"],name='yhat_lower'))
+# figure.add_trace(go.Scatter(x=forecast["ds"],y=forecast["yhat_upper"],name='yhat_upper'))
+#   # figure.add_trace(go.Scatter(x=forecast["ds"],y=forecast["trend"]))
+# figure.update_layout(title = coin_name+" Price Analysis and Prediction", 
+#                       xaxis_rangeslider_visible=True)
 
   # figure.show()
 
@@ -104,11 +110,11 @@ figure.update_layout(title = coin_name+" Price Analysis and Prediction",
 # st.write("Data for last 15 days")
 # st.dataframe(df.tail(15))
 # st.plotly_chart(figure1, use_container_width=True)
-st.write("Forecast for next "+str(period)+" days")
+# st.write("Forecast for next "+str(period)+" days")
 # st.dataframe(forecast.tail(period))
 
-st.dataframe(forecast1.tail(period))
-st.plotly_chart(figure, use_container_width=True)
+# st.dataframe(forecast1.tail(period))
+st.plotly_chart(figure1, use_container_width=True)
 
 # with open('footer.html') as a:
 #     st.markdown(a.read(), unsafe_allow_html=True)
